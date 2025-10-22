@@ -165,7 +165,8 @@ public class DatabaseManager {
     public void saveTransaction(Transaction transaction) {
         String sql = "INSERT INTO transactions (id, sender, receiver, currency, amount, tax, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, transaction.getId().toString());
             // Handle console transactions (sender is null)
             String senderUUID = transaction.getSender() != null ? 
@@ -195,7 +196,8 @@ public class DatabaseManager {
         
         String sql = "INSERT INTO transactions (id, sender, receiver, currency, amount, tax, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             connection.setAutoCommit(false);
             
             for (Transaction transaction : transactions) {
@@ -236,7 +238,8 @@ public class DatabaseManager {
         
         String sql = "SELECT * FROM transactions WHERE sender = ? OR receiver = ? ORDER BY timestamp DESC LIMIT ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, uuid.toString());
             stmt.setInt(3, limit);
@@ -276,7 +279,8 @@ public class DatabaseManager {
         
         String sql = "SELECT * FROM transactions WHERE (sender = ? OR receiver = ?) AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, uuid.toString());
             stmt.setString(2, uuid.toString());
             stmt.setLong(3, sinceTime);
@@ -320,7 +324,8 @@ public class DatabaseManager {
         
         // Get sent transactions
         String sentSQL = "SELECT COUNT(*) as count, SUM(amount) as total FROM transactions WHERE sender = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sentSQL)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sentSQL)) {
             stmt.setString(1, uuid.toString());
             ResultSet rs = stmt.executeQuery();
             
@@ -334,7 +339,8 @@ public class DatabaseManager {
         
         // Get received transactions
         String receivedSQL = "SELECT COUNT(*) as count, SUM(amount) as total FROM transactions WHERE receiver = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(receivedSQL)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(receivedSQL)) {
             stmt.setString(1, uuid.toString());
             ResultSet rs = stmt.executeQuery();
             
@@ -361,7 +367,8 @@ public class DatabaseManager {
         long cutoffTime = System.currentTimeMillis() - (days * 24L * 60L * 60L * 1000L);
         String sql = "DELETE FROM transactions WHERE timestamp < ?";
         
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, cutoffTime);
             int deleted = stmt.executeUpdate();
             
@@ -379,6 +386,17 @@ public class DatabaseManager {
     public void backup() {
         // Implementation would depend on database type
         Logger.info("Database backup requested (not yet implemented)");
+    }
+    
+    /**
+     * Get a database connection from the pool or direct for SQLite.
+     */
+    private Connection getConnection() throws SQLException {
+        if (plugin.getConfigManager().getDatabaseType().equalsIgnoreCase("MYSQL") && dataSource != null) {
+            return dataSource.getConnection();
+        }
+        // Fallback for SQLite or if MySQL dataSource is not initialized
+        return connection;
     }
     
     /**
