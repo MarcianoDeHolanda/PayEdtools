@@ -198,7 +198,7 @@ public class DatabaseManager {
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            connection.setAutoCommit(false);
+            conn.setAutoCommit(false);
             
             for (Transaction transaction : transactions) {
                 stmt.setString(1, transaction.getId().toString());
@@ -215,15 +215,15 @@ public class DatabaseManager {
             }
             
             stmt.executeBatch();
-            connection.commit();
-            connection.setAutoCommit(true);
+            conn.commit();
+            conn.setAutoCommit(true);
             
             Logger.debug("Batch of " + transactions.size() + " transactions saved");
             
         } catch (SQLException e) {
             Logger.error("Failed to save transaction batch", e);
-            try {
-                connection.rollback();
+            try (Connection rollbackConn = getConnection()) {
+                rollbackConn.rollback();
             } catch (SQLException ex) {
                 Logger.error("Failed to rollback batch", ex);
             }
