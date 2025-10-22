@@ -37,21 +37,19 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
     
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Check if sender is a player
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("This command can only be used by players!");
-            return true;
-        }
+        // Check if sender is a player or console
+        boolean isConsole = !(sender instanceof Player);
+        Player player = isConsole ? null : (Player) sender;
         
-        // Check permission
-        if (!player.hasPermission("payedtools.payall")) {
+        // Check permission (console always has permission)
+        if (!isConsole && !player.hasPermission("payedtools.payall")) {
             plugin.getMessageManager().send(player, "no-permission");
             return true;
         }
         
         // Check arguments
         if (args.length < 2) {
-            player.sendMessage("§cUsage: /payall <currency> <amount>");
+            sender.sendMessage("§cUsage: /payall <currency> <amount>");
             return true;
         }
         
@@ -63,13 +61,25 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
             if (!plugin.getCurrencyManager().isCurrency(currency)) {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("currency", currency);
-                plugin.getMessageManager().send(player, "invalid-currency", placeholders);
+                if (isConsole) {
+                    sender.sendMessage("§cCurrency '" + currency + "' does not exist!");
+                } else {
+                    plugin.getMessageManager().send(player, "invalid-currency", placeholders);
+                }
             } else if (plugin.getCurrencyManager().isBlocked(currency)) {
-                plugin.getMessageManager().send(player, "currency-blocked");
+                if (isConsole) {
+                    sender.sendMessage("§cCurrency '" + currency + "' is blocked!");
+                } else {
+                    plugin.getMessageManager().send(player, "currency-blocked");
+                }
             } else if (!plugin.getCurrencyManager().isAllowed(currency)) {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("currency", currency);
-                plugin.getMessageManager().send(player, "currency-not-allowed", placeholders);
+                if (isConsole) {
+                    sender.sendMessage("§cCurrency '" + currency + "' is not allowed!");
+                } else {
+                    plugin.getMessageManager().send(player, "currency-not-allowed", placeholders);
+                }
             }
             return true;
         }
@@ -79,29 +89,39 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
         try {
             amount = amountParser.parse(amountStr);
         } catch (NumberFormatException e) {
-            plugin.getMessageManager().send(player, "invalid-amount");
+            if (isConsole) {
+                sender.sendMessage("§cInvalid amount! Please enter a valid number.");
+            } else {
+                plugin.getMessageManager().send(player, "invalid-amount");
+            }
             return true;
         }
         
-        // Validate amount
-        boolean bypassLimits = player.hasPermission("payedtools.bypass.limits");
+        // Validate amount (console bypasses all limits - TODAPODEROSA! 😄)
+        boolean bypassLimits = isConsole || (player != null && player.hasPermission("payedtools.bypass.limits"));
         AmountParser.ValidationResult validation = amountParser.validate(amount, bypassLimits);
         
         if (!validation.isValid()) {
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("minimum", String.valueOf(plugin.getConfigManager().getMinimumAmount()));
-            placeholders.put("maximum", String.valueOf(plugin.getConfigManager().getMaximumAmount()));
-            plugin.getMessageManager().send(player, validation.getErrorKey(), placeholders);
+            if (isConsole) {
+                sender.sendMessage("§cAmount validation failed: " + validation.getErrorCode());
+            } else {
+                Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("minimum", String.valueOf(plugin.getConfigManager().getMinimumAmount()));
+                placeholders.put("maximum", String.valueOf(plugin.getConfigManager().getMaximumAmount()));
+                plugin.getMessageManager().send(player, validation.getErrorKey(), placeholders);
+            }
             return true;
         }
         
-        // Get online players (excluding sender)
+        // Get online players (excluding sender if it's a player)
         updateOnlinePlayerCache();
         List<UUID> targetPlayers = new ArrayList<>(cachedOnlinePlayers);
-        targetPlayers.remove(player.getUniqueId()); // Remove sender
+        if (!isConsole) {
+            targetPlayers.remove(player.getUniqueId()); // Remove sender only if it's a player
+        }
         
         if (targetPlayers.isEmpty()) {
-            player.sendMessage("§cNo other players online to pay!");
+            sender.sendMessage("§cNo players online to pay!");
             return true;
         }
         
@@ -110,8 +130,8 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
         double tax = calculateTax(amount) * targetPlayers.size();
         double totalWithTax = totalCost + tax;
         
-        // Check if sender has enough balance
-        if (!plugin.getCurrencyManager().hasEnough(player.getUniqueId(), currency, totalWithTax)) {
+        // Check if sender has enough balance (CONSOLE IS TODAPODEROSA! 😄)
+        if (!isConsole && !plugin.getCurrencyManager().hasEnough(player.getUniqueId(), currency, totalWithTax)) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("currency", currency);
             placeholders.put("balance", amountParser.format(plugin.getCurrencyManager().getBalance(player.getUniqueId(), currency)));
@@ -119,8 +139,8 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         
-        // Check cooldown (optional for payall)
-        if (plugin.getCooldownManager().isOnCooldown(player)) {
+        // Check cooldown (console bypasses cooldown - TODAPODEROSA! 😄)
+        if (!isConsole && plugin.getCooldownManager().isOnCooldown(player)) {
             int remaining = plugin.getCooldownManager().getRemainingCooldown(player);
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("cooldown", String.valueOf(remaining));
@@ -129,7 +149,7 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
         }
         
         // Process bulk payment
-        processBulkPayment(player, targetPlayers, currency, amount, tax);
+        processBulkPayment(sender, isConsole, player, targetPlayers, currency, amount, tax);
         
         return true;
     }
@@ -137,11 +157,12 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
     /**
      * Process bulk payment to multiple players
      */
-    private void processBulkPayment(Player sender, List<UUID> targetPlayers, String currency, double amount, double taxPerPlayer) {
+    private void processBulkPayment(CommandSender sender, boolean isConsole, Player player, List<UUID> targetPlayers, String currency, double amount, double taxPerPlayer) {
         long startTime = System.currentTimeMillis();
         
         // Send initial message
-        sender.sendMessage("§eProcessing payment to " + targetPlayers.size() + " players...");
+        String senderName = isConsole ? "§6§lCONSOLE§r" : sender.getName();
+        sender.sendMessage("§eProcessing payment to " + targetPlayers.size() + " players from " + senderName + "...");
         
         // Process transactions in parallel batches
         int batchSize = Math.min(10, targetPlayers.size()); // Process max 10 at a time
@@ -151,7 +172,7 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
             int endIndex = Math.min(i + batchSize, targetPlayers.size());
             List<UUID> batch = targetPlayers.subList(i, endIndex);
             
-            CompletableFuture<TransactionResult> batchFuture = processBatch(sender, batch, currency, amount, taxPerPlayer);
+            CompletableFuture<TransactionResult> batchFuture = processBatch(sender, isConsole, player, batch, currency, amount, taxPerPlayer);
             futures.add(batchFuture);
         }
         
@@ -202,12 +223,14 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
                     
                     sender.sendMessage("§7Processing completed in " + processingTime + "ms");
                     
-                    // Set cooldown and record metrics
-                    plugin.getCooldownManager().setCooldown(sender);
-                    plugin.getPerformanceMetrics().recordTransaction(
-                        currency, sender.getUniqueId(), null, amount * totalSuccess, 
-                        totalFailure == 0, processingTime
-                    );
+                    // Set cooldown and record metrics (only for players, not console)
+                    if (!isConsole) {
+                        plugin.getCooldownManager().setCooldown(player);
+                    }
+                    
+                    // Record metrics
+                    UUID senderUUID = isConsole ? null : player.getUniqueId();
+                    plugin.getPerformanceMetrics().recordPayallCommand(totalSuccess, processingTime);
                 });
             })
             .exceptionally(throwable -> {
@@ -222,7 +245,7 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
     /**
      * Process a batch of transactions
      */
-    private CompletableFuture<TransactionResult> processBatch(Player sender, List<UUID> batch, String currency, double amount, double taxPerPlayer) {
+    private CompletableFuture<TransactionResult> processBatch(CommandSender sender, boolean isConsole, Player player, List<UUID> batch, String currency, double amount, double taxPerPlayer) {
         return CompletableFuture.supplyAsync(() -> {
             int successCount = 0;
             int failureCount = 0;
@@ -230,8 +253,9 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
             for (UUID targetUUID : batch) {
                 try {
                     // Process individual transaction
+                    UUID senderUUID = isConsole ? null : player.getUniqueId();
                     TransactionManager.TransactionResult result = plugin.getTransactionManager()
-                        .processTransaction(sender.getUniqueId(), targetUUID, currency, amount, false)
+                        .processTransaction(senderUUID, targetUUID, currency, amount, false)
                         .get(); // Wait for completion
                     
                     if (result.isSuccess()) {
@@ -243,7 +267,8 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
                             Map<String, String> placeholders = new HashMap<>();
                             placeholders.put("amount", amountParser.format(amount));
                             placeholders.put("currency", currency);
-                            placeholders.put("sender", sender.getName());
+                            String senderName = isConsole ? "§6§lCONSOLE§r" : sender.getName();
+                            placeholders.put("sender", senderName);
                             plugin.getMessageManager().send(targetPlayer, "payment-received", placeholders);
                         }
                     } else {

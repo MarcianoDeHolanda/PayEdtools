@@ -81,15 +81,17 @@ public class TransactionManager {
             double tax = calculateTax(amount);
             double totalDeducted = amount + tax;
             
-            // Check if sender has enough
-            if (!currencyManager.hasEnough(sender, currency, totalDeducted)) {
+            // Check if sender has enough (console bypasses this - TODAPODEROSA! 😄)
+            if (sender != null && !currencyManager.hasEnough(sender, currency, totalDeducted)) {
                 return new TransactionResult(false, "insufficient_funds", null);
             }
             
             // Perform the transfer atomically
             try {
-                // Remove from sender
-                currencyManager.removeCurrency(sender, currency, totalDeducted);
+                // Remove from sender (only if not console)
+                if (sender != null) {
+                    currencyManager.removeCurrency(sender, currency, totalDeducted);
+                }
                 
                 // Add to receiver
                 currencyManager.addCurrency(receiver, currency, amount);
@@ -190,12 +192,19 @@ public class TransactionManager {
     private String formatTransactionLog(Transaction transaction) {
         String format = plugin.getConfigManager().getLogFormat();
         
-        OfflinePlayer sender = Bukkit.getOfflinePlayer(transaction.getSender());
+        String senderName;
+        if (transaction.getSender() != null) {
+            OfflinePlayer sender = Bukkit.getOfflinePlayer(transaction.getSender());
+            senderName = sender.getName();
+        } else {
+            senderName = "§6§lCONSOLE§r"; // Console transaction
+        }
+        
         OfflinePlayer receiver = Bukkit.getOfflinePlayer(transaction.getReceiver());
         
         return format
             .replace("%timestamp%", new Date(transaction.getTimestamp()).toString())
-            .replace("%sender%", sender.getName())
+            .replace("%sender%", senderName)
             .replace("%receiver%", receiver.getName())
             .replace("%amount%", String.valueOf(transaction.getAmount()))
             .replace("%currency%", transaction.getCurrency());

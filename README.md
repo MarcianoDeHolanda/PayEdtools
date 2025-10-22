@@ -41,6 +41,7 @@ PayEdtools is a comprehensive, production-ready addon for EdTools that implement
 - **PlaceholderAPI Integration:** Full placeholder support
 - **Multi-language Ready:** Fully customizable messages
 - **Admin Tools:** Reload command and bypass permissions
+- **Console Support:** `/payall` command works from console with unlimited power! 😄
 
 ## Installation
 
@@ -147,6 +148,10 @@ tax:
 # Bulk payment to all online players
 /payall farm-coins 1000          # Pay 1000 farm-coins to everyone online
 
+# Console usage (TODAPODEROSA! 😄)
+payall savia 1000                # From console - bypasses ALL restrictions!
+payall farm-coins 500            # No balance check, no cooldowns, no limits!
+
 # View history
 /payhistory
 /payhistory nottabaker
@@ -204,6 +209,7 @@ PayEdtools is optimized for production use and high-load servers:
 
 ### High-Load Optimizations
 - **PayAll Command:** Optimized bulk payments with batch processing
+  - **Console Support:** Can be executed from console (console bypasses all limits - TODAPODEROSA! 😄)
 - **Tab Completion Cache:** Cached player names for faster suggestions
 - **Performance Metrics:** Real-time monitoring of system performance
 - **Database Indexes:** Optimized indexes for fast queries
