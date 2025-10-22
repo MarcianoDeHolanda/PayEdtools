@@ -1,0 +1,321 @@
+# ====================================
+# PayEdtools Configuration
+# Production-Ready Currency Transfer System
+# Author: nottabaker
+# ====================================
+
+# Plugin Settings
+settings:
+  # Enable debug logging for troubleshooting
+  debug: false
+  
+  # Save transaction history to database
+  save-transaction-history: true
+  
+  # Maximum transactions to keep in history per player
+  max-history-size: 100
+  
+  # Auto-cleanup old transactions (days, 0 to disable)
+  cleanup-after-days: 30
+  
+  # Enable async operations for better performance
+  async-operations: true
+
+# Currency Format Conversions
+# These allow players to use shorthand like "1k" or "10M"
+currency-formats:
+  enabled: true
+  # Case insensitive - both "k" and "K" will work
+  formats:
+    k: 1000
+    m: 1000000
+    b: 1000000000
+    t: 1000000000000
+  # Support decimal values (e.g., 1.5M = 1,500,000)
+  allow-decimals: true
+
+# Cooldown System
+cooldown:
+  # Enable cooldown between payments
+  enabled: true
+  # Cooldown time in seconds
+  time: 5
+  # Permission to bypass: payedtools.bypass.cooldown
+
+# Transaction Limits
+limits:
+  # Enable transaction limits
+  enabled: true
+  # Minimum amount that can be transferred
+  minimum: 1.0
+  # Maximum amount that can be transferred (0 for unlimited)
+  maximum: 0
+  # Permission to bypass: payedtools.bypass.limits
+
+# Rate Limiting (Anti-Spam) - Optimized for 200+ players
+rate-limit:
+  # Enable rate limiting
+  enabled: true
+  # Maximum transactions per time window (increased for high population)
+  max-transactions: 20
+  # Time window in seconds
+  time-window: 60
+  # Action when limit exceeded: DENY, WARN, KICK
+  action: DENY
+
+# Transaction Confirmation
+confirmation:
+  # Require confirmation for large amounts
+  enabled: true
+  # Amount threshold to require confirmation
+  threshold: 1000000
+  # Confirmation timeout in seconds
+  timeout: 30
+
+# Blocked Currencies
+# List currencies that cannot be transferred
+blocked-currencies: []
+# Example:
+# - "special-currency"
+# - "admin-coins"
+
+# Allowed Currencies
+# Leave empty to allow all currencies, or specify a whitelist
+allowed-currencies: 
+  - "savia"
+  - "farm-coins"
+  - "mining-coins"
+  - "tokens"
+  - "gems"
+  - "credits"
+# Example:
+# - "farm-coins"
+# - "mining-tokens"
+
+# Self-Transfer
+# Allow players to pay themselves (usually disabled)
+allow-self-transfer: false
+
+# Offline Players
+# Allow transfers to offline players
+allow-offline-transfers: true
+
+# Transaction Tax
+tax:
+  # Enable transaction tax/fee
+  enabled: false
+  # Tax percentage (e.g., 5 = 5%)
+  percentage: 0
+  # Fixed tax amount (added to percentage)
+  fixed: 0
+  # Minimum transaction amount to apply tax
+  minimum-for-tax: 0
+
+# Logging
+logging:
+  # Log all transactions to console
+  console: true
+  # Log all transactions to file
+  file: true
+  # Log file location (relative to plugin folder)
+  file-path: "transactions.log"
+  # Log format: [timestamp] [sender] -> [receiver]: [amount] [currency]
+  format: "[%timestamp%] %sender% -> %receiver%: %amount% %currency%"
+
+# Messages
+# Supports PlaceholderAPI placeholders
+# Available placeholders:
+# %sender%, %receiver%, %currency%, %amount%, %balance%, %cooldown%, %tax%
+messages:
+  prefix: "&8[&6PayEdtools&8]&r "
+  
+  # Success messages
+  payment-sent: "&aYou sent &e%amount% %currency% &ato &e%receiver%&a!"
+  payment-received: "&aYou received &e%amount% %currency% &afrom &e%sender%&a!"
+  
+  # Error messages
+  invalid-player: "&cPlayer &e%player% &cnot found or never played before!"
+  invalid-currency: "&cCurrency &e%currency% &cdoes not exist!"
+  invalid-amount: "&cInvalid amount! Please enter a valid number."
+  insufficient-funds: "&cYou don't have enough &e%currency%&c! You have: &e%balance%"
+  self-transfer: "&cYou cannot send currency to yourself!"
+  currency-blocked: "&cThis currency cannot be transferred!"
+  
+  # Cooldown messages
+  cooldown-active: "&cPlease wait &e%cooldown%s &cbefore sending currency again!"
+  
+  # Limit messages
+  amount-too-low: "&cAmount must be at least &e%minimum%&c!"
+  amount-too-high: "&cAmount cannot exceed &e%maximum%&c!"
+  rate-limit-exceeded: "&cYou're sending payments too quickly! Please slow down."
+  currency-not-allowed: "&cThe currency &e%currency% &cis not allowed for transfers!"
+  
+  # Confirmation messages
+  confirmation-required: "&eConfirm transfer of &6%amount% %currency% &eto &6%receiver%&e?"
+  confirmation-prompt: "&eType &a/pay confirm &eto proceed or &c/pay cancel &eto abort."
+  confirmation-sent: "&aPayment confirmed!"
+  confirmation-cancelled: "&cPayment cancelled."
+  confirmation-expired: "&cPayment confirmation expired."
+  
+  # Tax messages
+  tax-applied: "&eTax: &c-%tax% %currency%"
+  
+  # Admin messages
+  reload-success: "&aConfiguration reloaded successfully!"
+  reload-error: "&cError reloading configuration! Check console for details."
+  
+  # History messages
+  history-header: "&8&m----------&r &6Transaction History &8&m----------"
+  history-entry: "&7%timestamp% &8| &e%type% &8| &a%amount% %currency% &8| &7%player%"
+  history-footer: "&8&m----------&r &7Page %page%/%maxpage% &8&m----------"
+  history-empty: "&cNo transaction history found."
+  
+  # Stats messages
+  stats-header: "&8&m----------&r &6Payment Statistics &8&m----------"
+  stats-sent: "&eSent: &a%sent% transactions &8(&7%sent-amount% total&8)"
+  stats-received: "&eReceived: &a%received% transactions &8(&7%received-amount% total&8)"
+  stats-footer: "&8&m----------------------------------------"
+  
+  # Usage messages
+  usage-pay: "&cUsage: /pay <player> <currency> <amount>"
+  usage-payall: "&cUsage: /payall <currency> <amount>"
+  usage-history: "&cUsage: /payhistory [player]"
+  usage-stats: "&cUsage: /paystats [player]"
+  
+  # Permission messages
+  no-permission: "&cYou don't have permission to use this command!"
+
+# Command Aliases
+# Custom aliases can be added in plugin.yml
+command-aliases:
+  pay: [transfer, send]
+  payall: [payeveryone, payonline]
+  payhistory: [transactions, history]
+  paystats: [stats]
+
+# Performance Settings
+performance:
+  # Cache currency validation results
+  cache-currency-validation: true
+  # Cache duration in seconds
+  cache-duration: 300
+  
+  # Balance cache settings
+  balance-cache:
+    enabled: true
+    duration: 30  # 30 seconds for balance cache
+    cleanup-interval: 300  # Cleanup every 5 minutes
+  
+  # Batch database operations
+  batch-database-operations: true
+  # Batch size (optimized for 200+ players)
+  batch-size: 200
+  
+  # Thread pool size for async operations (optimized for high load)
+  thread-pool-size: 12
+  
+  # PayAll command optimization
+  payall:
+    batch-size: 10  # Process 10 players at a time
+    max-players: 100  # Maximum players to pay at once
+    cache-update-interval: 2000  # Update player cache every 2 seconds
+  
+  # Performance testing settings
+  testing:
+    enabled: true
+    max-concurrent-tests: 3
+    default-stress-test:
+      players: 50
+      threads: 10
+      transactions-per-thread: 100
+      min-amount: 100.0
+      max-amount: 10000.0
+      delay-between-transactions: 0
+    default-load-test:
+      players: 100
+      initial-load: 5
+      max-load: 50
+      load-increment: 5
+      load-increase-delay: 2000
+      transactions-per-thread: 50
+    benchmark-scenarios:
+      - name: "Small Transactions"
+        concurrent-transactions: 20
+        transactions-per-thread: 50
+        amount: 100.0
+        delay-between-transactions: 0
+        delay-after-scenario: 1000
+      - name: "Medium Transactions"
+        concurrent-transactions: 15
+        transactions-per-thread: 30
+        amount: 1000.0
+        delay-between-transactions: 0
+        delay-after-scenario: 1000
+      - name: "Large Transactions"
+        concurrent-transactions: 10
+        transactions-per-thread: 20
+        amount: 10000.0
+        delay-between-transactions: 0
+        delay-after-scenario: 1000
+      - name: "High Frequency"
+        concurrent-transactions: 30
+        transactions-per-thread: 100
+        amount: 500.0
+        delay-between-transactions: 10
+        delay-after-scenario: 1000
+      - name: "Low Frequency"
+        concurrent-transactions: 5
+        transactions-per-thread: 10
+        amount: 5000.0
+        delay-between-transactions: 100
+        delay-after-scenario: 1000
+
+# Advanced Settings
+advanced:
+  # Check for updates on startup
+  check-updates: true
+  
+  # Send anonymous usage statistics
+  metrics: true
+  
+  # Backup data before reload
+  backup-on-reload: true
+  
+  # Maximum decimal places for amounts
+  decimal-places: 2
+  
+  # Number formatting locale (en_US, es_ES, etc.)
+  number-format-locale: "en_US"
+
+# Integration Settings
+integrations:
+  # PlaceholderAPI integration
+  placeholderapi:
+    enabled: true
+  
+  # Discord webhook for transaction logging
+  discord:
+    enabled: false
+    webhook-url: ""
+    # Log transactions above this amount
+    log-threshold: 1000000
+
+# Database Settings (for transaction history)
+database:
+  # Database type: SQLITE, MYSQL, H2
+  type: "SQLITE"
+  # SQLite settings (file stored in plugin folder)
+  sqlite:
+    filename: "transactions.db"
+  # MySQL settings
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "payedtools"
+    username: "root"
+    password: "password"
+    # Connection pool settings
+    pool:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000

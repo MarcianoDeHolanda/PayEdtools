@@ -1,0 +1,81 @@
+name: PayEdtools
+version: '${project.version}'
+main: ve.nottabaker.payedtools.PayEdtools
+api-version: '1.16'
+author: nottabaker
+description: Production-ready EdTools currency transfer addon with advanced features
+website: https://nottabaker.ve
+depend: [EdTools]
+softdepend: [PlaceholderAPI]
+
+commands:
+  pay:
+    description: Transfer currency to another player
+    usage: /<command> <player> <currency> <amount>
+    aliases: [transfer, send]
+    permission: payedtools.use
+  payall:
+    description: Transfer currency to all online players
+    usage: /<command> <currency> <amount>
+    aliases: [payeveryone, payonline]
+    permission: payedtools.payall
+  payreload:
+    description: Reload the PayEdtools configuration
+    usage: /<command>
+    permission: payedtools.admin
+  payhistory:
+    description: View your transaction history
+    usage: /<command> [player]
+    aliases: [transactions, history]
+    permission: payedtools.history
+  paystats:
+    description: View payment statistics
+    usage: /<command> [player]
+    permission: payedtools.stats
+  paymetrics:
+    description: View performance metrics
+    usage: /<command>
+    permission: payedtools.admin
+  paytest:
+    description: Run performance tests
+    usage: /<command> <stress|load|benchmark|stop|results|clear|status>
+    permission: payedtools.admin
+
+permissions:
+  payedtools.*:
+    description: Gives access to all PayEdtools features
+    children:
+      payedtools.use: true
+      payedtools.payall: true
+      payedtools.admin: true
+      payedtools.history: true
+      payedtools.stats: true
+      payedtools.bypass.cooldown: true
+      payedtools.bypass.limits: true
+  payedtools.use:
+    description: Allows use of the /pay command
+    default: true
+  payedtools.payall:
+    description: Allows use of the /payall command
+    default: op
+  payedtools.admin:
+    description: Allows administrative commands
+    default: op
+  payedtools.history:
+    description: Allows viewing transaction history
+    default: true
+  payedtools.history.others:
+    description: Allows viewing others' transaction history
+    default: op
+  payedtools.stats:
+    description: Allows viewing payment statistics
+    default: true
+  payedtools.stats.others:
+    description: Allows viewing others' payment statistics
+    default: op
+  payedtools.bypass.cooldown:
+    description: Bypass payment cooldowns
+    default: op
+  payedtools.bypass.limits:
+    description: Bypass payment limits
+    default: op
