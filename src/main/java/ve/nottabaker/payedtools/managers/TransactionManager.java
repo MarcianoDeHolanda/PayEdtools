@@ -23,6 +23,9 @@ public class TransactionManager {
     private final BlockingQueue<Transaction> transactionQueue;
     private final List<Transaction> pendingTransactions;
     
+    // Pending offline transactions
+    private final Map<UUID, List<PendingOfflineTransaction>> pendingOfflineTransactions;
+    
     public TransactionManager(PayEdtools plugin) {
         this.plugin = plugin;
         this.currencyManager = plugin.getCurrencyManager();
@@ -32,6 +35,7 @@ public class TransactionManager {
         
         this.transactionQueue = new LinkedBlockingQueue<>();
         this.pendingTransactions = Collections.synchronizedList(new ArrayList<>());
+        this.pendingOfflineTransactions = new ConcurrentHashMap<>();
         
         // Start batch processor if enabled
         if (plugin.getConfigManager().isBatchDatabaseOperations()) {
@@ -93,8 +97,15 @@ public class TransactionManager {
                     currencyManager.removeCurrency(sender, currency, totalDeducted);
                 }
                 
-                // Add to receiver
-                currencyManager.addCurrency(receiver, currency, amount);
+                // Check if receiver is online
+                org.bukkit.OfflinePlayer receiverPlayer = org.bukkit.Bukkit.getOfflinePlayer(receiver);
+                if (receiverPlayer.isOnline()) {
+                    // Player is online - process immediately
+                    currencyManager.addCurrency(receiver, currency, amount);
+                } else {
+                    // Player is offline - store as pending transaction
+                    storePendingTransaction(receiver, currency, amount);
+                }
                 
                 // Update transaction with tax
                 transaction.setTax(tax);
@@ -287,6 +298,54 @@ public class TransactionManager {
     }
     
     /**
+     * Store a pending transaction for an offline player
+     */
+    private void storePendingTransaction(UUID playerUUID, String currency, double amount) {
+        PendingOfflineTransaction pending = new PendingOfflineTransaction(currency, amount, System.currentTimeMillis());
+        pendingOfflineTransactions.computeIfAbsent(playerUUID, k -> Collections.synchronizedList(new ArrayList<>())).add(pending);
+        Logger.debug("Stored pending transaction for offline player " + playerUUID + ": " + amount + " " + currency);
+    }
+    
+    /**
+     * Process pending transactions for a player when they join
+     */
+    public void processPendingTransactions(UUID playerUUID) {
+        List<PendingOfflineTransaction> pending = pendingOfflineTransactions.remove(playerUUID);
+        if (pending == null || pending.isEmpty()) {
+            return;
+        }
+        
+        Logger.debug("Processing " + pending.size() + " pending transactions for " + playerUUID);
+        
+        // Group by currency and sum amounts
+        Map<String, Double> currencyTotals = new HashMap<>();
+        for (PendingOfflineTransaction transaction : pending) {
+            currencyTotals.merge(transaction.getCurrency(), transaction.getAmount(), Double::sum);
+        }
+        
+        // Process each currency
+        for (Map.Entry<String, Double> entry : currencyTotals.entrySet()) {
+            String currency = entry.getKey();
+            double totalAmount = entry.getValue();
+            
+            try {
+                currencyManager.addCurrency(playerUUID, currency, totalAmount);
+                Logger.debug("Processed pending transaction: " + totalAmount + " " + currency + " to " + playerUUID);
+            } catch (Exception e) {
+                Logger.error("Failed to process pending transaction for " + playerUUID, e);
+            }
+        }
+    }
+    
+    /**
+     * Get pending transactions count for a player
+     */
+    public int getPendingTransactionsCount(UUID playerUUID) {
+        List<PendingOfflineTransaction> pending = pendingOfflineTransactions.get(playerUUID);
+        return pending != null ? pending.size() : 0;
+    }
+    
+    /**
      * Shutdown executor service
      */
     public void shutdown() {
@@ -372,5 +431,24 @@ public class TransactionManager {
         public double getReceivedTotal() {
             return receivedTotal;
         }
+    }
+    
+    /**
+     * Represents a pending transaction for an offline player
+     */
+    public static class PendingOfflineTransaction {
+        private final String currency;
+        private final double amount;
+        private final long timestamp;
+        
+        public PendingOfflineTransaction(String currency, double amount, long timestamp) {
+            this.currency = currency;
+            this.amount = amount;
+            this.timestamp = timestamp;
+        }
+        
+        public String getCurrency() { return currency; }
+        public double getAmount() { return amount; }
+        public long getTimestamp() { return timestamp; }
     }
 }

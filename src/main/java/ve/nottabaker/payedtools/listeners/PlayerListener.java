@@ -28,14 +28,17 @@ public class PlayerListener implements Listener {
     }
     
     /**
-     * Handle player join - notify about offline transactions
+     * Handle player join - process pending transactions and notify about offline transactions
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        // Check for recent transactions while player was offline
-        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
+        // Process pending transactions first
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // Get recent transactions (last 24 hours)
+                // Process any pending transactions for this player
+                plugin.getTransactionManager().processPendingTransactions(event.getPlayer().getUniqueId());
+                
+                // Check for recent transactions while player was offline
                 long sinceTime = System.currentTimeMillis() - (24 * 60 * 60 * 1000);
                 List<Transaction> recentTransactions = getRecentTransactions(event.getPlayer().getUniqueId(), sinceTime);
                 
@@ -46,9 +49,9 @@ public class PlayerListener implements Listener {
                     });
                 }
             } catch (Exception e) {
-                Logger.error("Error checking offline transactions for " + event.getPlayer().getName(), e);
+                Logger.error("Error processing pending transactions for " + event.getPlayer().getName(), e);
             }
-        }, 20L); // Wait 1 second after join
+        });
     }
     
     /**
