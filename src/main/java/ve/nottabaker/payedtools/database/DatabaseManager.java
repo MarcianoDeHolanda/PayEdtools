@@ -163,7 +163,10 @@ public class DatabaseManager {
         
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, transaction.getId().toString());
-            stmt.setString(2, transaction.getSender().toString());
+            // Handle console transactions (sender is null)
+            String senderUUID = transaction.getSender() != null ? 
+                transaction.getSender().toString() : "CONSOLE";
+            stmt.setString(2, senderUUID);
             stmt.setString(3, transaction.getReceiver().toString());
             stmt.setString(4, transaction.getCurrency());
             stmt.setDouble(5, transaction.getAmount());
@@ -193,7 +196,10 @@ public class DatabaseManager {
             
             for (Transaction transaction : transactions) {
                 stmt.setString(1, transaction.getId().toString());
-                stmt.setString(2, transaction.getSender().toString());
+                // Handle console transactions (sender is null)
+                String senderUUID = transaction.getSender() != null ? 
+                    transaction.getSender().toString() : "CONSOLE";
+                stmt.setString(2, senderUUID);
                 stmt.setString(3, transaction.getReceiver().toString());
                 stmt.setString(4, transaction.getCurrency());
                 stmt.setDouble(5, transaction.getAmount());
@@ -234,9 +240,13 @@ public class DatabaseManager {
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
+                // Handle console transactions (sender stored as "CONSOLE")
+                String senderStr = rs.getString("sender");
+                UUID senderUUID = "CONSOLE".equals(senderStr) ? null : UUID.fromString(senderStr);
+                
                 Transaction transaction = new Transaction(
                     UUID.fromString(rs.getString("id")),
-                    UUID.fromString(rs.getString("sender")),
+                    senderUUID,
                     UUID.fromString(rs.getString("receiver")),
                     rs.getString("currency"),
                     rs.getDouble("amount"),
