@@ -132,6 +132,16 @@ public class DatabaseManager {
             stmt.execute(createTableSQL);
             Logger.debug("Transactions table created/verified");
             
+            // Create last logins table
+            String createLastLoginsSQL = """
+                CREATE TABLE IF NOT EXISTS last_logins (
+                    player_uuid VARCHAR(36) PRIMARY KEY,
+                    last_login_time BIGINT NOT NULL
+                )
+            """;
+            stmt.execute(createLastLoginsSQL);
+            Logger.debug("Last logins table created/verified");
+            
             // Create indexes separately (SQLite compatible)
             createIndexes(stmt);
         }
@@ -386,6 +396,52 @@ public class DatabaseManager {
     public void backup() {
         // Implementation would depend on database type
         Logger.info("Database backup requested (not yet implemented)");
+    }
+    
+    /**
+     * Get the last login time for a player from database
+     */
+    public long getLastLoginTime(UUID playerUUID) {
+        String sql = "SELECT last_login_time FROM last_logins WHERE player_uuid = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, playerUUID.toString());
+            
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getLong("last_login_time");
+            }
+        } catch (SQLException e) {
+            Logger.error("Error getting last login time for " + playerUUID, e);
+        }
+        
+        // If no last login time found, return 24 hours ago as fallback
+        return System.currentTimeMillis() - (24 * 60 * 60 * 1000);
+    }
+    
+    /**
+     * Update the last login time for a player in database
+     */
+    public void updateLastLoginTime(UUID playerUUID) {
+        // Use UPSERT syntax compatible with both MySQL and SQLite
+        String sql;
+        if (plugin.getConfigManager().getDatabaseType().equalsIgnoreCase("MYSQL")) {
+            sql = "INSERT INTO last_logins (player_uuid, last_login_time) VALUES (?, ?) ON DUPLICATE KEY UPDATE last_login_time = VALUES(last_login_time)";
+        } else {
+            sql = "INSERT OR REPLACE INTO last_logins (player_uuid, last_login_time) VALUES (?, ?)";
+        }
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, playerUUID.toString());
+            stmt.setLong(2, System.currentTimeMillis());
+            
+            stmt.executeUpdate();
+            Logger.debug("Updated last login time for " + playerUUID);
+        } catch (SQLException e) {
+            Logger.error("Error updating last login time for " + playerUUID, e);
+        }
     }
     
     /**
