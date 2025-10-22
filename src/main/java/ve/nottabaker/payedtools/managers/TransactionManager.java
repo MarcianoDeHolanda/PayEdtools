@@ -273,6 +273,13 @@ public class TransactionManager {
     }
     
     /**
+     * Get transaction history for a player since a specific time
+     */
+    public List<Transaction> getTransactionHistorySince(UUID uuid, long sinceTime, int limit) {
+        return plugin.getDatabaseManager().getTransactionHistorySince(uuid, sinceTime, limit);
+    }
+    
+    /**
      * Get transaction statistics for a player
      */
     public TransactionStats getTransactionStats(UUID uuid) {

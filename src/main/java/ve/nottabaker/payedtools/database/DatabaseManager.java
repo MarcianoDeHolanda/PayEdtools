@@ -265,6 +265,47 @@ public class DatabaseManager {
     }
     
     /**
+     * Get transaction history for a player since a specific time
+     */
+    public List<Transaction> getTransactionHistorySince(UUID uuid, long sinceTime, int limit) {
+        List<Transaction> history = new ArrayList<>();
+        
+        String sql = "SELECT * FROM transactions WHERE (sender = ? OR receiver = ?) AND timestamp >= ? ORDER BY timestamp DESC LIMIT ?";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setString(2, uuid.toString());
+            stmt.setLong(3, sinceTime);
+            stmt.setInt(4, limit);
+            
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                // Handle console transactions (sender stored as "CONSOLE")
+                String senderStr = rs.getString("sender");
+                UUID senderUUID = "CONSOLE".equals(senderStr) ? null : UUID.fromString(senderStr);
+                
+                Transaction transaction = new Transaction(
+                    UUID.fromString(rs.getString("id")),
+                    senderUUID,
+                    UUID.fromString(rs.getString("receiver")),
+                    rs.getString("currency"),
+                    rs.getDouble("amount"),
+                    rs.getLong("timestamp")
+                );
+                transaction.setTax(rs.getDouble("tax"));
+                
+                history.add(transaction);
+            }
+            
+        } catch (SQLException e) {
+            Logger.error("Failed to get transaction history since " + sinceTime + " for " + uuid, e);
+        }
+        
+        return history;
+    }
+    
+    /**
      * Get transaction statistics for a player
      */
     public TransactionStats getTransactionStats(UUID uuid) {
