@@ -103,7 +103,7 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
         
         if (!validation.isValid()) {
             if (isConsole) {
-                sender.sendMessage("§cAmount validation failed: " + validation.getErrorCode());
+                sender.sendMessage("§cAmount validation failed: " + validation.getErrorKey());
             } else {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("minimum", String.valueOf(plugin.getConfigManager().getMinimumAmount()));
@@ -210,10 +210,14 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
                         // Show tax if applicable
                         if (taxPerPlayer > 0) {
                             double totalTax = taxPerPlayer * totalSuccess;
-                            Map<String, String> taxPlaceholders = new HashMap<>();
-                            taxPlaceholders.put("tax", amountParser.format(totalTax));
-                            taxPlaceholders.put("currency", currency);
-                            plugin.getMessageManager().send(sender, "tax-applied", taxPlaceholders);
+                            if (isConsole) {
+                                sender.sendMessage("§eTax: §c-" + amountParser.format(totalTax) + " " + currency);
+                            } else {
+                                Map<String, String> taxPlaceholders = new HashMap<>();
+                                taxPlaceholders.put("tax", amountParser.format(totalTax));
+                                taxPlaceholders.put("currency", currency);
+                                plugin.getMessageManager().send(player, "tax-applied", taxPlaceholders);
+                            }
                         }
                     }
                     
@@ -229,8 +233,7 @@ public class PayAllCommand implements CommandExecutor, TabCompleter {
                     }
                     
                     // Record metrics
-                    UUID senderUUID = isConsole ? null : player.getUniqueId();
-                    plugin.getPerformanceMetrics().recordPayallCommand(totalSuccess, processingTime);
+                    plugin.getPerformanceMetrics().recordBatchOperation(totalSuccess);
                 });
             })
             .exceptionally(throwable -> {
