@@ -87,6 +87,14 @@ public class BalanceCache {
     }
     
     /**
+     * Clear cache for a specific player
+     */
+    public void clearPlayerCache(UUID playerUUID) {
+        balanceCache.remove(playerUUID);
+        Logger.debug("Cleared balance cache for player " + playerUUID);
+    }
+    
+    /**
      * Clear all cache
      */
     public void clear() {

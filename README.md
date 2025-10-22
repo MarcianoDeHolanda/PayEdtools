@@ -411,9 +411,19 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 ```bash
 git clone https://github.com/MarcianoDeHolanda/PayEdtools.git
 cd PayEdtools
-# Add your EdTools API JARs to the lib/ folder
+
+# Create lib directory and add EdTools API JARs
+mkdir lib
+# Download EdTools-API.jar and EdLib-API.jar from your EdTools installation
+# Place them in the lib/ folder
+
 mvn clean package
 ```
+
+**Note:** The EdTools API JARs are not included in this repository. You need to:
+1. Download `EdTools-API.jar` and `EdLib-API.jar` from your EdTools installation
+2. Place them in the `lib/` folder
+3. Then run `mvn clean package`
 
 ### Code Style
 - Follow Java conventions

@@ -63,8 +63,15 @@ public class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID playerUUID = event.getPlayer().getUniqueId();
+        
         // Cancel any pending confirmations
-        plugin.getConfirmationManager().cancel(event.getPlayer().getUniqueId());
+        plugin.getConfirmationManager().cancel(playerUUID);
+        
+        // Clear player's balance cache
+        plugin.getCurrencyManager().getBalanceCache().clearPlayerCache(playerUUID);
+        
+        Logger.debug("Cleaned up data for player " + event.getPlayer().getName());
     }
     
     /**

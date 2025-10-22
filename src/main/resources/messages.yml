@@ -1,0 +1,89 @@
+# PayEdtools Messages Configuration
+# All plugin messages are defined here for easy translation and customization
+
+# Permission messages
+no-permission: "§cYou don't have permission to use this command!"
+
+# Player validation messages
+invalid-player: "§cPlayer '{player}' not found or has never joined the server!"
+self-transfer: "§cYou cannot send money to yourself!"
+
+# Currency validation messages
+invalid-currency: "§cCurrency '{currency}' does not exist in EdTools!"
+currency-blocked: "§cThis currency is blocked by the server administrator!"
+currency-not-allowed: "§cCurrency '{currency}' is not allowed on this server!"
+
+# Amount validation messages
+invalid-amount: "§cInvalid amount! Please enter a valid number."
+amount-too-low: "§cAmount too low! Minimum: {minimum} {currency}"
+amount-too-high: "§cAmount too high! Maximum: {maximum} {currency}"
+
+# Balance messages
+insufficient-funds: "§cInsufficient funds! You have {balance} {currency}"
+
+# Cooldown messages
+cooldown-active: "§cPlease wait {cooldown} seconds before using this command again!"
+
+# Rate limiting messages
+rate-limit-exceeded: "§cYou are sending money too quickly! Please slow down."
+
+# Confirmation messages
+confirmation-required: "§eConfirmation required for {amount} {currency} to {receiver}"
+confirmation-prompt: "§7Type §a/pay confirm §7to confirm or §c/pay cancel §7to cancel"
+confirmation-sent: "§aPayment confirmed and sent!"
+confirmation-cancelled: "§cPayment cancelled."
+confirmation-expired: "§cConfirmation expired. Please try again."
+
+# Transaction messages
+payment-sent: "§aYou sent {amount} {currency} to {receiver}"
+payment-received: "§aYou received {amount} {currency} from {sender}"
+tax-applied: "§eTax: §c-{tax} {currency}"
+
+# PayAll messages
+payall-processing: "§eProcessing payment to {count} players..."
+payall-success: "§aSuccessfully paid {count} players!"
+payall-failed: "§cFailed to pay {failed} players. Check console for details."
+
+# History messages
+history-header: "§8§m----------&r §6Transaction History &8§m----------"
+history-entry: "§7{timestamp} §8| {type} §7{amount} {currency} §8| §7{other_player}"
+history-sent: "§c↑ Sent"
+history-received: "§a↓ Received"
+history-no-transactions: "§7No transactions found."
+
+# Stats messages
+stats-header: "§8§m----------&r §6Transaction Statistics &8§m----------"
+stats-sent: "§cSent: §7{count} transactions, {total} {currency}"
+stats-received: "§aReceived: §7{count} transactions, {total} {currency}"
+
+# Offline transaction messages
+offline-header: "§8§m----------&r §6Offline Transactions &8§m----------"
+offline-message: "§eYou received money while offline:"
+offline-entry: "§a+ {amount} {currency}"
+offline-total: "§7Total: {count} transactions"
+offline-footer: "§8§m----------------------------------------"
+
+# Error messages
+transaction-failed: "§cTransaction failed due to a technical error. Your currency has been refunded."
+unknown-error: "§cAn unknown error occurred. Please contact an administrator."
+database-error: "§cDatabase error occurred. Please try again later."
+
+# Command usage messages
+usage-pay: "§cUsage: /pay <player> <currency> <amount>"
+usage-payall: "§cUsage: /payall <currency> <amount>"
+usage-payhistory: "§cUsage: /payhistory [page]"
+usage-paystats: "§cUsage: /paystats [player]"
+
+# Admin messages
+reload-success: "§aPayEdtools configuration reloaded successfully!"
+reload-error: "§cError reloading configuration: {error}"
+
+# Performance messages
+metrics-header: "§8§m----------&r §6Performance Metrics &8§m----------"
+metrics-transactions: "§eTransactions: §a{total} §8(Success: {success_rate}%, Failed: {failed})"
+metrics-processing-time: "§eAvg Processing Time: §a{time}ms"
+metrics-cache-hit: "§eCache Hit Ratio: §a{ratio}% §8(Hits: {hits}, Misses: {misses})"
+metrics-database: "§eDatabase Operations: §a{queries} §8(Batches: {batches}, Avg Batch Size: {avg_size})"
+metrics-payall: "§ePayAll Commands: §a{commands} §8(Players: {players}, Avg Time: {time}ms)"
+metrics-tab-cache: "§eTab Completion Cache: §a{players} §8players"
+metrics-footer: "§8§m--------------------------------------------------"

@@ -10,6 +10,9 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
+# Library JARs (should not be in repository)
+lib/*.jar
+
 # IDE
 .idea/
 *.iml

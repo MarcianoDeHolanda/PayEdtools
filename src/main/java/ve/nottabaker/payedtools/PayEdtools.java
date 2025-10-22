@@ -44,6 +44,11 @@ public class PayEdtools extends JavaPlugin {
     private PerformanceMetrics performanceMetrics;
     private PerformanceTester performanceTester;
     
+    // Static instance getter - moved to top as recommended
+    public static PayEdtools getInstance() {
+        return instance;
+    }
+    
     @Override
     public void onEnable() {
         instance = this;
@@ -213,10 +218,6 @@ public class PayEdtools extends JavaPlugin {
     }
     
     // Getters
-    
-    public static PayEdtools getInstance() {
-        return instance;
-    }
     
     public EdToolsAPI getEdToolsAPI() {
         return edToolsAPI;

@@ -111,6 +111,13 @@ public class ConfigManager {
     }
     
     /**
+     * Get the ConfigManager instance from the plugin
+     */
+    public static ConfigManager getInstance() {
+        return PayEdtools.getInstance().getConfigManager();
+    }
+    
+    /**
      * Load and cache configuration values
      */
     public void loadConfiguration() {
