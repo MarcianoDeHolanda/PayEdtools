@@ -96,7 +96,8 @@ public class PayHistoryCommand implements CommandExecutor, TabCompleter {
         
         // Entries
         for (Transaction transaction : history) {
-            boolean isSender = transaction.getSender().equals(player.getUniqueId());
+            UUID senderUUID = transaction.getSender();
+            boolean isSender = senderUUID != null && senderUUID.equals(player.getUniqueId());
             
             String type = isSender ? "§c↑ Sent" : "§a↓ Received";
             String otherPlayer;
@@ -105,8 +106,12 @@ public class PayHistoryCommand implements CommandExecutor, TabCompleter {
                 OfflinePlayer receiver = Bukkit.getOfflinePlayer(transaction.getReceiver());
                 otherPlayer = receiver.getName();
             } else {
-                OfflinePlayer sender = Bukkit.getOfflinePlayer(transaction.getSender());
-                otherPlayer = sender.getName();
+                if (senderUUID != null) {
+                    OfflinePlayer sender = Bukkit.getOfflinePlayer(senderUUID);
+                    otherPlayer = sender.getName();
+                } else {
+                    otherPlayer = "§6§lCONSOLE§r";
+                }
             }
             
             Map<String, String> placeholders = new HashMap<>();

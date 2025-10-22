@@ -33,16 +33,16 @@ public class DatabaseManager {
         try {
             String dbType = plugin.getConfigManager().getDatabaseType();
             
-            if (dbType.equalsIgnoreCase("SQLITE")) {
-                initializeSQLite();
-            } else if (dbType.equalsIgnoreCase("MYSQL")) {
-                initializeMySQL();
-            } else {
-                Logger.error("Unknown database type: " + dbType);
-                return;
-            }
-            
-            createTables();
+                    if (dbType.equalsIgnoreCase("SQLITE")) {
+                        initializeSQLite();
+                        createTables(connection);
+                    } else if (dbType.equalsIgnoreCase("MYSQL")) {
+                        initializeMySQL();
+                        // Tables are created in initializeMySQL() method
+                    } else {
+                        Logger.error("Unknown database type: " + dbType);
+                        return;
+                    }
             Logger.info("Database initialized successfully");
             
         } catch (Exception e) {
@@ -101,7 +101,11 @@ public class DatabaseManager {
         config.addDataSourceProperty("maintainTimeStats", "false");
         
         dataSource = new HikariDataSource(config);
-        connection = dataSource.getConnection();
+        
+        // Test connection and create tables
+        try (Connection testConnection = dataSource.getConnection()) {
+            createTables(testConnection);
+        }
         
         Logger.debug("MySQL database connected with HikariCP: " + host + ":" + port);
         Logger.debug("Connection pool size: " + config.getMaximumPoolSize());
@@ -110,7 +114,7 @@ public class DatabaseManager {
     /**
      * Create necessary database tables
      */
-    private void createTables() throws SQLException {
+    private void createTables(Connection conn) throws SQLException {
         // Create the main table first
         String createTableSQL = """
             CREATE TABLE IF NOT EXISTS transactions (
@@ -124,7 +128,7 @@ public class DatabaseManager {
             )
         """;
         
-        try (Statement stmt = connection.createStatement()) {
+        try (Statement stmt = conn.createStatement()) {
             stmt.execute(createTableSQL);
             Logger.debug("Transactions table created/verified");
             
