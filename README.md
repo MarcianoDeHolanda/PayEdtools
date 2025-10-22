@@ -2,8 +2,19 @@
 
 **Author:** nottabaker  
 **Version:** 1.0.0  
-**License:** All Rights Reserved  
+**License:** Free to Use - Open Source  
 **🤖 Developed 100% with [Codella AI](https://codella.ai/)** - This entire plugin was created using Codella's artificial intelligence platform
+
+## 🤝 Open Source & Collaborations
+
+This plugin is **completely free to use** and I'm **open to collaborations**! Feel free to:
+- Use this plugin on your server
+- Fork and modify the code
+- Submit pull requests with improvements
+- Report bugs or suggest new features
+- Contribute to the development
+
+**Contact:** If you want to collaborate or have questions, feel free to reach out!
 
 ## Description
 
@@ -377,3 +388,47 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 - Admin tools and bypass permissions
 
 **🤖 Codella AI Development Note:** This entire plugin (5,970+ lines of code across 39 files) was developed from concept to production-ready release using [Codella AI](https://codella.ai/), demonstrating the current capabilities of AI in software development.
+
+---
+
+## 🚀 Contributing & Development
+
+### How to Contribute
+1. **Fork the repository** on GitHub
+2. **Create a feature branch** for your changes
+3. **Make your improvements** and test thoroughly
+4. **Submit a pull request** with a clear description
+
+### Areas for Contribution
+- **New Features:** Additional commands, integrations, or functionality
+- **Performance:** Further optimizations for large servers
+- **Bug Fixes:** Report and fix any issues you encounter
+- **Documentation:** Improve README, code comments, or wiki
+- **Testing:** Add more comprehensive test cases
+- **Translations:** Add support for multiple languages
+
+### Development Setup
+```bash
+git clone https://github.com/MarcianoDeHolanda/PayEdtools.git
+cd PayEdtools
+# Add your EdTools API JARs to the lib/ folder
+mvn clean package
+```
+
+### Code Style
+- Follow Java conventions
+- Add comprehensive comments for complex logic
+- Include error handling for all operations
+- Test thoroughly before submitting
+
+**🎯 Goal:** Make this the best EdTools payment plugin available for the community!
+
+---
+
+## 📞 Contact & Support
+
+- **GitHub Issues:** For bug reports and feature requests
+- **Pull Requests:** For code contributions
+- **Discussions:** For general questions and ideas
+
+**Made with ❤️ by nottabaker using [Codella AI](https://codella.ai/)**
