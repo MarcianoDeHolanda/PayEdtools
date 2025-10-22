@@ -10,9 +10,15 @@ import ve.nottabaker.payedtools.models.Transaction;
 import ve.nottabaker.payedtools.utils.AmountParser;
 import ve.nottabaker.payedtools.utils.Logger;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * Handles player-related events
@@ -21,10 +27,12 @@ public class PlayerListener implements Listener {
     
     private final PayEdtools plugin;
     private final AmountParser amountParser;
+    private final File lastLoginFile;
     
     public PlayerListener(PayEdtools plugin) {
         this.plugin = plugin;
         this.amountParser = new AmountParser(plugin);
+        this.lastLoginFile = new File(plugin.getDataFolder(), "last-logins.properties");
     }
     
     /**
@@ -38,9 +46,9 @@ public class PlayerListener implements Listener {
                 // Process any pending transactions for this player
                 plugin.getTransactionManager().processPendingTransactions(event.getPlayer().getUniqueId());
                 
-                // Check for recent transactions while player was offline
-                long sinceTime = System.currentTimeMillis() - (24 * 60 * 60 * 1000);
-                List<Transaction> recentTransactions = getRecentTransactions(event.getPlayer().getUniqueId(), sinceTime);
+                // Check for transactions since last login
+                long lastLoginTime = getLastLoginTime(event.getPlayer().getUniqueId());
+                List<Transaction> recentTransactions = getRecentTransactions(event.getPlayer().getUniqueId(), lastLoginTime);
                 
                 if (!recentTransactions.isEmpty()) {
                     // Notify player about offline transactions
@@ -48,6 +56,9 @@ public class PlayerListener implements Listener {
                         notifyOfflineTransactions(event.getPlayer(), recentTransactions);
                     });
                 }
+                
+                // Update last login time
+                updateLastLoginTime(event.getPlayer().getUniqueId());
             } catch (Exception e) {
                 Logger.error("Error processing pending transactions for " + event.getPlayer().getName(), e);
             }
@@ -112,5 +123,56 @@ public class PlayerListener implements Listener {
         
         player.sendMessage("§7Total: " + transactionCount + " transactions");
         player.sendMessage("§8§m----------------------------------------");
+    }
+    
+    /**
+     * Get the last login time for a player
+     */
+    private long getLastLoginTime(UUID playerUUID) {
+        Properties props = new Properties();
+        try {
+            if (lastLoginFile.exists()) {
+                try (FileReader reader = new FileReader(lastLoginFile)) {
+                    props.load(reader);
+                }
+            }
+            
+            String lastLoginStr = props.getProperty(playerUUID.toString());
+            if (lastLoginStr != null) {
+                return Long.parseLong(lastLoginStr);
+            }
+        } catch (IOException | NumberFormatException e) {
+            Logger.warning("Error reading last login time for " + playerUUID + ": " + e.getMessage());
+        }
+        
+        // If no last login time found, return 24 hours ago as fallback
+        return System.currentTimeMillis() - (24 * 60 * 60 * 1000);
+    }
+    
+    /**
+     * Update the last login time for a player
+     */
+    private void updateLastLoginTime(UUID playerUUID) {
+        Properties props = new Properties();
+        try {
+            // Load existing properties
+            if (lastLoginFile.exists()) {
+                try (FileReader reader = new FileReader(lastLoginFile)) {
+                    props.load(reader);
+                }
+            }
+            
+            // Update the last login time
+            props.setProperty(playerUUID.toString(), String.valueOf(System.currentTimeMillis()));
+            
+            // Save back to file
+            try (FileWriter writer = new FileWriter(lastLoginFile)) {
+                props.store(writer, "Last login times for players");
+            }
+            
+            Logger.debug("Updated last login time for " + playerUUID);
+        } catch (IOException e) {
+            Logger.warning("Error updating last login time for " + playerUUID + ": " + e.getMessage());
+        }
     }
 }

@@ -135,25 +135,15 @@ public class CurrencyManager {
      */
     public void addCurrency(UUID uuid, String currency, double amount) {
         try {
-            Logger.info("Adding " + amount + " " + currency + " to player " + uuid);
-            
             // For transactions, we want to avoid boosters affecting the amount
             // So we'll get the current balance and set the new balance directly
             double currentBalance = getBalanceDirect(uuid, currency);
-            Logger.info("Current balance for " + uuid + " (" + currency + "): " + currentBalance);
-            
             double newBalance = currentBalance + amount;
-            Logger.info("Setting new balance for " + uuid + " (" + currency + "): " + newBalance);
             
             currencyAPI.setCurrency(uuid, currency, newBalance);
-            Logger.info("Successfully set currency via EdTools API");
             
             // Invalidate cache for this player and currency
             balanceCache.invalidateBalance(uuid, currency);
-            
-            // Verify the balance was actually set
-            double verifyBalance = getBalanceDirect(uuid, currency);
-            Logger.info("Verified balance for " + uuid + " (" + currency + "): " + verifyBalance);
             
             Logger.debug("Added " + amount + " " + currency + " to " + uuid + " (total: " + newBalance + ")");
         } catch (Exception e) {
