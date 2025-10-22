@@ -3,13 +3,13 @@
 **Author:** nottabaker  
 **Version:** 1.0.0  
 **License:** All Rights Reserved  
-**🤖 Developed 100% with AI** - This entire plugin was created using artificial intelligence
+**🤖 Developed 100% with [Codella AI](https://codella.ai/)** - This entire plugin was created using Codella's artificial intelligence platform
 
 ## Description
 
 PayEdtools is a comprehensive, production-ready addon for EdTools that implements a powerful `/pay` command system for transferring currencies between players. Built with enterprise-grade features including transaction logging, rate limiting, confirmations, and complete error handling.
 
-**🚀 AI-Powered Development:** This plugin represents a complete end-to-end AI development project, showcasing how artificial intelligence can create production-ready software with advanced optimizations, comprehensive testing systems, and enterprise-grade features.
+**🚀 Codella AI-Powered Development:** This plugin represents a complete end-to-end AI development project using [Codella AI](https://codella.ai/), showcasing how artificial intelligence can create production-ready software with advanced optimizations, comprehensive testing systems, and enterprise-grade features.
 
 ## Features
 
@@ -287,9 +287,9 @@ api.getTransactionManager().processTransaction(
 });
 ```
 
-## 🤖 AI Development Showcase
+## 🤖 Codella AI Development Showcase
 
-This project demonstrates the capabilities of AI in software development:
+This project demonstrates the capabilities of [Codella AI](https://codella.ai/) in software development:
 
 ### **What AI Accomplished:**
 - ✅ **Complete Plugin Architecture** - Designed from scratch with proper separation of concerns
@@ -300,7 +300,7 @@ This project demonstrates the capabilities of AI in software development:
 - ✅ **Real-time Monitoring** - Performance metrics and analytics
 - ✅ **Documentation** - Complete README, code comments, and usage examples
 
-### **AI Development Process:**
+### **Codella AI Development Process:**
 1. **Requirements Analysis** - Understanding EdTools integration needs
 2. **Architecture Design** - Creating scalable, maintainable structure
 3. **Feature Implementation** - Core functionality with advanced optimizations
@@ -310,7 +310,7 @@ This project demonstrates the capabilities of AI in software development:
 7. **Build & Deployment** - Maven configuration and GitHub integration
 
 ### **Technical Achievements:**
-- **5,970+ lines of code** written entirely by AI
+- **5,970+ lines of code** written entirely by Codella AI
 - **39 files** with proper Java architecture
 - **Enterprise-grade optimizations** for 200+ concurrent players
 - **Advanced testing capabilities** with simulated load scenarios
@@ -322,6 +322,25 @@ For support, bug reports, or feature requests:
 - **Author:** nottabaker
 - **Email:** support@nottabaker.ve
 - **Website:** https://nottabaker.ve
+
+## 🤖 Powered by Codella AI
+
+This project was entirely developed using [Codella AI](https://codella.ai/), a powerful AI platform for creating Minecraft plugins without coding knowledge.
+
+### **About Codella AI:**
+- **No Coding Required** - Create astounding plugins with natural language
+- **Production-Ready Code** - Generates enterprise-grade Java code
+- **Complete Solutions** - From concept to deployment
+- **Advanced Features** - Performance optimizations, testing frameworks, and more
+
+### **Why Codella AI:**
+- ✅ **Intelligent Architecture** - Designs proper software patterns
+- ✅ **Performance Focus** - Implements advanced optimizations
+- ✅ **Testing Integration** - Creates comprehensive test systems
+- ✅ **Documentation** - Generates complete documentation
+- ✅ **Production Ready** - Enterprise-grade code quality
+
+**Visit [Codella AI](https://codella.ai/) to create your own plugins with AI!**
 
 ## License
 
@@ -351,4 +370,4 @@ This software is proprietary and confidential. Unauthorized copying, distributio
 - Full configuration system
 - Admin tools and bypass permissions
 
-**🤖 AI Development Note:** This entire plugin (5,970+ lines of code across 39 files) was developed from concept to production-ready release using artificial intelligence, demonstrating the current capabilities of AI in software development.
+**🤖 Codella AI Development Note:** This entire plugin (5,970+ lines of code across 39 files) was developed from concept to production-ready release using [Codella AI](https://codella.ai/), demonstrating the current capabilities of AI in software development.
